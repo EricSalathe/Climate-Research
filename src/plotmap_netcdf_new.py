@@ -15,20 +15,45 @@ from numpy import (
 from matplotlib.pyplot import plot, show
 
 import numpy as np
-import os
-
-from netCDF4 import Dataset
 import matplotlib.pyplot as plt
+
 from matplotlib.cm import get_cmap
 import cartopy
 import cartopy.crs as crs
 from cartopy.feature import NaturalEarthFeature
 
+def main():
+    # open netcdf file
+    #ncGridFile = Dataset("grid_d02.nc", "r", format="NETCDF4")
+    from netCDF4 import Dataset
+
+    ncFile = Dataset("ccsm4_1970-2006_TX90th.nc",
+                           "r", format="NETCDF4")
+        
+    # get the data to plot
+    T90=ncFile.variables["T90"][:]
+    lats = ncFile.variables["XLAT"][:]
+    lons = ncFile.variables["XLONG"][:]
+    
+    
+    # set variable specific options
+    plotvar=T90[0,:,:]-273.15
+    ## min=round(amin(plotvar)/5)*5+5
+    ## max=round(amax(plotvar)/5)*5+5
+    Tmin=10
+    Tmax=40
+    
+    # draw plot
+    
+    plt.figure(figsize=(15,10))
+    WRFplot(plotvar,lats,lons, Tmin,Tmax, "CCSM4-WRF 1970-2006", "T90 in °C", "RdYlBu_r")
+    plt.show()
+# END main
+
 
 # Plotting Routine
 
 def WRFplot(plotvar,lats,lons,  vmin,vmax, title,varname, ColMap):
-    
     # Set the cartopy mapping object for the WRF domain
     #  (Taken from wrf getcartopy and cartopy_xlim)
     cart_proj = cartopy.crs.LambertConformal(
@@ -72,32 +97,8 @@ def WRFplot(plotvar,lats,lons,  vmin,vmax, title,varname, ColMap):
     
     # Add a title
     plt.title(title)
-        
+# END WRFplot
+  
+# Execute
+main()
 
-# open netcdf file
-#ncGridFile = Dataset("grid_d02.nc", "r", format="NETCDF4")
-
-ncFile = Dataset("ccsm4_1970-2006_TX90th.nc",
-                       "r", format="NETCDF4")
-
-
-# get the data to plot
-T90=ncFile.variables["T90"][:]
-lats = ncFile.variables["XLAT"][:]
-lons = ncFile.variables["XLONG"][:]
-
-
-# set variable specific options
-plotvar=T90[0,:,:]-273.15
-## min=round(amin(plotvar)/5)*5+5
-## max=round(amax(plotvar)/5)*5+5
-Tmin=10
-Tmax=40
-
-# draw plot
-
-fig = plt.figure(figsize=(15,10))
-
-WRFplot(plotvar,lats,lons, Tmin,Tmax, "CCSM4-WRF 1970-2006", "T90 in °C", "RdYlBu_r")
-
-plt.show()
